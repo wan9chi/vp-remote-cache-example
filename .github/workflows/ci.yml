@@ -60,4 +60,13 @@ jobs:
         with:
           cache: true
           run-install: true
-      - run: vp run -r build
+      - run: vp run -r build 2>&1 | tee build.log
+        shell: bash
+      - name: Report cache hits
+        shell: bash
+        run: |
+          {
+            echo '```'
+            sed 's/\x1b\[[0-9;]*m//g' build.log | grep -E 'build\.mjs|^vp run:'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
