@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The cache accepts uploads only from push jobs on the default branch that
+  # can request a GitHub OIDC token.
+  publish:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VP_REMOTE_CACHE: read-write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          cache: true
+          run-install: true
+      - run: vp run -r build
+
+  # A fresh runner with no local cache should replay what publish uploaded.
+  replay:
+    needs: publish
+    runs-on: ubuntu-latest
+    env:
+      VP_REMOTE_CACHE: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          cache: true
+          run-install: true
+      - run: vp run -r build 2>&1 | tee build.log
+        shell: bash
+      - name: Check that both builds were restored from the remote cache
+        shell: bash
+        run: |
+          test "$(sed 's/\x1b\[[0-9;]*m//g' build.log | grep -c 'remote cache hit')" -eq 2
+          cat packages/greeting/dist/index.js packages/app/dist/index.html
+
+  # Pull requests and manual runs read from the cache but never upload.
+  build:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    env:
+      VP_REMOTE_CACHE: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          cache: true
+          run-install: true
+      - run: vp run -r build

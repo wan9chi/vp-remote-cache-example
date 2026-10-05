@@ -1,0 +1,14 @@
+{
+  "name": "vp-remote-cache-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.0.0-commit.11393b1a9ec1739c5897fefd418bdb095a34db7e",
+    "vite-plus": "0.0.0-commit.11393b1a9ec1739c5897fefd418bdb095a34db7e"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "packageManager": "pnpm@11.24.0"
+}
