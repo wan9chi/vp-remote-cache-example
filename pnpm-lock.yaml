@@ -23,6 +23,8 @@ importers:
 
   packages/greeting: {}
 
+  packages/payload: {}
+
 packages:
 
   '@babel/code-frame@7.29.7':
